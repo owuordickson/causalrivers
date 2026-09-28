@@ -1,16 +1,13 @@
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (
+    accuracy_score,
     precision_recall_curve,
     roc_auc_score,
-    accuracy_score,
 )
 
 # precision recall warning.
 np.seterr(divide="ignore", invalid="ignore")
-
-
-
 
 
 def remove_diagonal(T):
@@ -45,7 +42,7 @@ def f1_max(labs, preds):
     # F1 MAX
     precision, recall, thresholds = precision_recall_curve(labs, preds)
     f1_scores = 2 * recall * precision / (recall + precision)
-    f1_thresh = thresholds[np.argmax(f1_scores)]
+    f1_thresh = thresholds[np.nanargmax(f1_scores)]
     f1_score = np.nanmax(f1_scores)
     return f1_thresh, f1_score
 
@@ -56,15 +53,15 @@ def score(preds, labs, remove_autoregressive=True, name="Result"):
     Takes in either a 2dim or a 3dim tensor (batch of summary graphs)
     name is used for later column naming.
     """
-    
+
     # Some casting concerning input data type:
     if isinstance(preds, list):
-        preds = np.array(preds) 
+        preds = np.array(preds)
     if isinstance(labs, list):
-        labs = np.array(labs) 
-    if isinstance(preds,pd.DataFrame):
+        labs = np.array(labs)
+    if isinstance(preds, pd.DataFrame):
         preds = preds.values
-    if isinstance(labs,pd.DataFrame):
+    if isinstance(labs, pd.DataFrame):
         labs = labs.values
     # expand dims if a single samle is provided
     if preds.ndim == 2:

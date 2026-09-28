@@ -1,12 +1,12 @@
 __all__ = [
     "add_one_random_node",
-    "combine_far_apart",
-    "get_all_subgraphs",
-    "get_all_sink_cases",
-    "get_longest_path",
-    "check_corr_character",
-    "select_confounder_samples",
     "all_extensions",
+    "check_corr_character",
+    "combine_far_apart",
+    "get_all_sink_cases",
+    "get_all_subgraphs",
+    "get_longest_path",
+    "select_confounder_samples",
 ]
 
 import random
@@ -14,7 +14,6 @@ from itertools import combinations
 
 import networkx as nx
 import numpy as np
-
 
 # TODO The sampling algorithms are inefficient for higher number of nodes. FIX this with proper algorithms.
 # TODO Create a single random process for this tool to control the randomness -> reproducibility.
@@ -87,7 +86,11 @@ def get_all_subgraphs(G: nx.Graph, n_vars: int = 5) -> list[set[int]]:
         graph_stack = [[start_node]]
         for step in range(n_vars - 1):
             # checks for all possible extensions for all current subgraphs in the graph stack
-            res = [item for sublist in [all_extensions(g, G) for g in graph_stack] for item in sublist]
+            res = [
+                item
+                for sublist in [all_extensions(g, G) for g in graph_stack]
+                for item in sublist
+            ]
             if len(res) > 0:
                 # extensions
                 graph_stack = res
@@ -99,7 +102,9 @@ def get_all_subgraphs(G: nx.Graph, n_vars: int = 5) -> list[set[int]]:
 
     # There might be many double graphs so we remove them by
     # sorting ids and removing doubles via set.
-    return list(set(tuple(sorted(i)) for i in [item for sublist in full_stack for item in sublist]))
+    return list(
+        {tuple(sorted(i)) for i in [item for sublist in full_stack for item in sublist]}
+    )
 
 
 def get_all_sink_cases(G, n_vars=12, restrict=15):
@@ -129,14 +134,18 @@ def get_longest_path(sub_G, measure="km"):
                 if None in distances:
                     return np.inf
                 else:
-                    lengths.append(sum([sub_G.edges[step[0], step[1]][measure] for step in x]))
+                    lengths.append(
+                        sum([sub_G.edges[step[0], step[1]][measure] for step in x])
+                    )
     return max(lengths)
 
 
-def check_corr_character(sub_G, measure=[["lag_median", 10], ["lag_var", 1000]]):
+def check_corr_character(sub_G, measure=None):
     """
     Check if a candidate graph confirms with specified measurements.
     """
+    if measure is None:
+        measure = [["lag_median", 10], ["lag_var", 1000]]
     for edge in sub_G.edges:
         info = sub_G.edges[edge]
         for category in measure:
@@ -173,5 +182,9 @@ def all_extensions(current_G: nx.Graph, G: nx.Graph, succ: bool = True):
         [extensions.append(x) for x in list(G.predecessors(node)) if x not in current_G]
 
         if succ:
-            [extensions.append(x) for x in list(G.successors(node)) if x not in current_G]
+            [
+                extensions.append(x)
+                for x in list(G.successors(node))
+                if x not in current_G
+            ]
     return [current_G + [ex] for ex in set(extensions)]

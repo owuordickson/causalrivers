@@ -1,8 +1,9 @@
+import datetime
+import os
+import pickle
+
 import numpy as np
 import pandas as pd
-import pickle
-import os
-import datetime
 from omegaconf import OmegaConf
 
 
@@ -11,16 +12,18 @@ def remove_trailing_nans(sample_prep):
     Removes samples that were not removed by interpolate.
     """
     check_trailing_nans = np.where(sample_prep.isnull().values.any(axis=1) == 0)[0]
-    if not len(check_trailing_nans) == 0:  # A ts is completely 0:
+    if len(check_trailing_nans) != 0:  # A ts is completely 0:
         sample_prep = sample_prep[
             check_trailing_nans.min() : check_trailing_nans.max() + 1
         ]
-        
-    if len(sample_prep) == 0: 
+
+    if len(sample_prep) == 0:
         # random case that everything is empty. This can happen when selecting a window.
         print("EMPTY SAMPLE DETECTED")
     return sample_prep
 
+
+"""
 # Subsample only all subgraphs that contain only saxony and thuringia nodes:
 def filter_samples_based_on_properties(ds, G, selection=["T", "S"], prop="origin"):
     sub_ds = []
@@ -29,6 +32,7 @@ def filter_samples_based_on_properties(ds, G, selection=["T", "S"], prop="origin
         if np.all([x in selection for x in origin_check]):
             sub_ds.append(d)
     return sub_ds
+"""
 
 
 def graph_to_label_tensor(G_sample, human_readable=False):
@@ -49,11 +53,12 @@ def graph_to_label_tensor(G_sample, human_readable=False):
         return labels
 
 
+"""
 def load_sample(which, p="resources/rivers_ts_east_germany.csv"):
     return pd.read_csv(
         p, index_col=0, usecols=["datetime"] + [str(x) for x in list(which.nodes)]
     )
-
+"""
 
 
 def preprocess_data(
@@ -73,7 +78,7 @@ def preprocess_data(
     # WARNING: This can make the TS arbitrarily short).
     if remove_trailing_nans_early:
         sample_data = remove_trailing_nans(sample_data)
-        
+
     # Adjust resolution
     sample_data["dt"] = pd.to_datetime(sample_data.index).round(resolution).values
 
@@ -109,7 +114,7 @@ def standard_preprocessing(
         subset_month=cfg.subset_year,
         subsample=cfg.subsample,
         normalize=cfg.normalize,
-        remove_trailing_nans_early=cfg.remove_trailing_nans_early
+        remove_trailing_nans_early=cfg.remove_trailing_nans_early,
     )
     return sample_data
 
@@ -143,7 +148,7 @@ def load_joint_samples(cfg, index_col="datetime", preprocessing=None):
     # To fix double col names due to human readable format.
     Y_names = [[m[1] for m in sample.columns.values] for sample in Y]
     # Get all required ts
-    unique_nodes = list(set([item for sublist in Y_names for item in sublist]))
+    unique_nodes = list({item for sublist in Y_names for item in sublist})
     unique_nodes = (
         ([index_col] + [str(x) for x in unique_nodes])
         if index_col
@@ -165,17 +170,18 @@ def load_joint_samples(cfg, index_col="datetime", preprocessing=None):
         # final nan removal if anyything remains.
         single_sample = remove_trailing_nans(single_sample)
         X.append(single_sample)
-        
+
         # PUT IN REMOVE TRAILING NANS HERE AND USE IT earlier also.
     return X, Y
 
 
-def save_run(out,stop_time, preds, cfg):
+def save_run(out, stop_time, preds, cfg):
     # make folder with naming
     p = cfg.save_path + cfg.method.name + "_" + cfg.label_path.split("/")[-2]
     if not os.path.exists(p):
         os.makedirs(p)
-    inner_p = p + "/" + str(datetime.datetime.now())[:24]
+    tstamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    inner_p = p + "/" + str(tstamp)
     os.makedirs(inner_p)
     out.to_csv(inner_p + "/scoring.csv")
 
