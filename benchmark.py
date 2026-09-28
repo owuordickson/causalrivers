@@ -25,9 +25,7 @@ def main(cfg: DictConfig):
     start = time.time()
     print("Loading data...")
     # First, we load the full dataset from path and preprocess according to config..
-    test_data, test_labels = load_joint_samples(
-        cfg, preprocessing=standard_preprocessing if cfg.dt_preprocess else None
-    )
+    test_data, test_labels = load_joint_samples(cfg, preprocessing=standard_preprocessing if cfg.dt_preprocess else None)
 
     # Then we simply run the specified method on all samples.
     print("Performing Causal Discovery...")

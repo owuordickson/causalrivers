@@ -34,12 +34,11 @@ def plot_current_state_of_graph(
     title="Rivers East Germany",
     pos=False,
     ax=False,
-    rotate_by=0, #TODO doesnt work.
-    custom_legend = None,
-    log_scale=None
+    rotate_by=0,  # TODO doesnt work.
+    custom_legend=None,
+    log_scale=None,
 ):
-    
-    
+
     if extra_points is None:
         extra_points = []
     if hardcode_colors is None:
@@ -64,9 +63,7 @@ def plot_current_state_of_graph(
         map_df = gpd.read_file(fp)
         if rotate_by != 0:
             map_df = map_df.rotate(rotate_by)
-        map_df.plot(
-            color="blue", alpha=0.3, ax=ax, linewidth=river_width, edgecolor="blue"
-        )
+        map_df.plot(color="blue", alpha=0.3, ax=ax, linewidth=river_width, edgecolor="blue")
 
     if hardcode_colors:
         colors = hardcode_colors
@@ -97,16 +94,15 @@ def plot_current_state_of_graph(
         width=width,
         ax=ax,
     )
-    
-    
+
     if rotate_by != 0:
         r = Affine2D().rotate_deg(rotate_by)  # Create a rotation transformation
         for x in ax.images + ax.lines + ax.collections:
             trans = x.get_transform()
-            x.set_transform(r+trans)
+            x.set_transform(r + trans)
             if isinstance(x, PathCollection):
                 transoff = x.get_offset_transform()
-                x._transOffset = r+transoff    #ax.set_frame_on(True)
+                x._transOffset = r + transoff  # ax.set_frame_on(True)
     if autozoom:
         ax.set_xlim(
             min([pos[x][0] for x in pos]) - autozoom,
@@ -125,27 +121,25 @@ def plot_current_state_of_graph(
 
     if custom_legend:
         ax.legend(handles=custom_legend[0], loc=custom_legend[1])
-        
-    if log_scale: 
+
+    if log_scale:
         ax.set_xscale("log", base=3.75)
 
-
         ax.set_yscale("asinh")
-
 
     ax.set_title(title)
     # doesnt work...
 
-
     if len(extra_points):
         for ex in extra_points:
-            ax.scatter(ex[0], ex[1], color="pink", s=100,edgecolors='black')
+            ax.scatter(ex[0], ex[1], color="pink", s=100, edgecolors="black")
             ax.annotate(ex[2], (ex[0], ex[1]))
 
     if save:
-        plt.savefig(save,bbox_inches='tight', dpi=500)
+        plt.savefig(save, bbox_inches="tight", dpi=500)
     else:
         plt.show()
+
 
 def simple_sample_display(sample_data):
     _fix, axs = plt.subplots(len(sample_data.T), 1, figsize=(3 * len(sample_data.T), 10))
@@ -170,13 +164,7 @@ def simple_sample_display_2(sample_data):
     plt.show()
 
 
-def fancy_plot(
-    sample_data,
-    base_c,
-    save= 0,
-    emph=19999,
-    label_nodes=True
-):
+def fancy_plot(sample_data, base_c, save=0, emph=19999, label_nodes=True):
     _fig, axs = plt.subplots(3, 1, figsize=(12, 5))
     for n, x in enumerate(sample_data.columns):
         axs[n].plot(sample_data[x], linewidth=2, color=base_c[n + 1], alpha=0.8)
@@ -198,33 +186,26 @@ def fancy_plot(
             )
         axs[n].set_xlabel(None)
         axs[n].tick_params(axis="both", which="major", labelsize=12)
-        
-        
-        
-        limit =  axs[n].get_xlim()
-        
-        axs[n].vlines(emph,sample_data[x].min(),sample_data[x].max(), color="red", linewidth=2)
-        axs[n].vlines(emph+150,sample_data[x].min(),sample_data[x].max(), color="red", linewidth=2)
-        axs[n].hlines(0,emph, emph+150, color="red", linewidth=2)
-        axs[n].hlines(sample_data[x].max(),emph, emph+150, color="red", linewidth=2)
-        axs[n].set_xlim(limit[0],limit[1])
-        
+
+        limit = axs[n].get_xlim()
+
+        axs[n].vlines(emph, sample_data[x].min(), sample_data[x].max(), color="red", linewidth=2)
+        axs[n].vlines(emph + 150, sample_data[x].min(), sample_data[x].max(), color="red", linewidth=2)
+        axs[n].hlines(0, emph, emph + 150, color="red", linewidth=2)
+        axs[n].hlines(sample_data[x].max(), emph, emph + 150, color="red", linewidth=2)
+        axs[n].set_xlim(limit[0], limit[1])
+
     axs[0].set_xticklabels([])
     axs[1].set_xticklabels([])
 
-
     axs[n].set_xlabel("Year", fontsize=14)
-    if save: 
-        plt.savefig(save,bbox_inches='tight', dpi=500)
+    if save:
+        plt.savefig(save, bbox_inches="tight", dpi=500)
     else:
         plt.show()
 
-def bare_fancy_plot(
-    sample_data,
-    save,
-    base_c
-    
-    ):
+
+def bare_fancy_plot(sample_data, save, base_c):
 
     _fig, axs = plt.subplots(3, 1, figsize=(8, 5))
     labels = ["A", "B", "C"]
@@ -232,20 +213,19 @@ def bare_fancy_plot(
         axs[n].plot(sample_data[x], linewidth=3, color=base_c[n + 1], alpha=1)
         axs[n].set_ylabel(labels[n], fontsize=25)
         axs[n].set_xlabel(None)
-        axs[n].tick_params(axis="both", which="major", labelsize=12)        
+        axs[n].tick_params(axis="both", which="major", labelsize=12)
         axs[n].set_yticklabels([])
 
-        
     axs[0].set_xticklabels([])
     axs[1].set_xticklabels([])
 
-
     axs[n].set_xlabel("Year", fontsize=14)
 
-    if save: 
-        plt.savefig(save,bbox_inches='tight', dpi=500)
+    if save:
+        plt.savefig(save, bbox_inches="tight", dpi=500)
     else:
         plt.show()
+
 
 def animate_ts(
     sample_data,
@@ -255,7 +235,7 @@ def animate_ts(
 ):
     if colors is None:
         colors = ["darkred", "darkblue", "darkgreen", "darkorange", "darkviolet"]
-    fig, axs = plt.subplots(sample_data.shape[1], 1, figsize=(16,9))
+    fig, axs = plt.subplots(sample_data.shape[1], 1, figsize=(16, 9))
     data = sample_data.apply(lambda x: np.log(x))
     for x in range(data.shape[1]):
         axs[x].yaxis.set_visible(False)

@@ -13,9 +13,7 @@ def remove_trailing_nans(sample_prep):
     """
     check_trailing_nans = np.where(sample_prep.isnull().values.any(axis=1) == 0)[0]
     if len(check_trailing_nans) != 0:  # A ts is completely 0:
-        sample_prep = sample_prep[
-            check_trailing_nans.min() : check_trailing_nans.max() + 1
-        ]
+        sample_prep = sample_prep[check_trailing_nans.min() : check_trailing_nans.max() + 1]
 
     if len(sample_prep) == 0:
         # random case that everything is empty. This can happen when selecting a window.
@@ -45,9 +43,7 @@ def graph_to_label_tensor(G_sample, human_readable=False):
                 labels[m, n] = 1
     if human_readable:
         labels = pd.DataFrame(labels, columns=nodes, index=nodes)
-        labels = pd.concat(
-            [pd.concat([labels], keys=["Cause"], axis=1)], keys=["Effect"]
-        )
+        labels = pd.concat([pd.concat([labels], keys=["Cause"], axis=1)], keys=["Effect"])
         return labels
     else:
         return labels
@@ -85,15 +81,10 @@ def preprocess_data(
     sample_data = sample_data.groupby("dt").mean()
     # subsampling
     if subset_year:
-        sample_data = sample_data.loc[
-            (sample_data.index.month.isin(subset_month))
-            & (sample_data.index.year == subset_year)
-        ]
+        sample_data = sample_data.loc[(sample_data.index.month.isin(subset_month)) & (sample_data.index.year == subset_year)]
     sample_data = sample_data.iloc[::subsample, :]
     if normalize:
-        sample_data = (sample_data - sample_data.min()) / (
-            sample_data.max() - sample_data.min()
-        )
+        sample_data = (sample_data - sample_data.min()) / (sample_data.max() - sample_data.min())
     if interpolate:
         sample_data = sample_data.interpolate()
     return sample_data
@@ -138,8 +129,9 @@ def load_joint_samples(cfg, index_col="datetime", preprocessing=None):
     Importantly, if you struggle with ram it migt be worth to load the samples individually as in 2_tutorial_benchmarking.
     This is however slower.
     """
-
-    data = pickle.load(open(cfg.label_path, "rb"))
+    with open(cfg.label_path, "rb") as f:
+        data = pickle.load(f)
+    # data = pickle.load(open(cfg.label_path, "rb"))
     # restrict which unique sample you want to process
     if cfg.restrict_to >= 0:
         data = data[cfg.restrict_to : cfg.restrict_to + 1]
@@ -149,11 +141,7 @@ def load_joint_samples(cfg, index_col="datetime", preprocessing=None):
     Y_names = [[m[1] for m in sample.columns.values] for sample in Y]
     # Get all required ts
     unique_nodes = list({item for sublist in Y_names for item in sublist})
-    unique_nodes = (
-        ([index_col] + [str(x) for x in unique_nodes])
-        if index_col
-        else [str(x) for x in unique_nodes]
-    )
+    unique_nodes = ([index_col] + [str(x) for x in unique_nodes]) if index_col else [str(x) for x in unique_nodes]
     # load required files
     data = pd.read_csv(
         cfg.data_path,
@@ -180,14 +168,16 @@ def save_run(out, stop_time, preds, cfg):
     p = cfg.save_path + cfg.method.name + "_" + cfg.label_path.split("/")[-2]
     if not os.path.exists(p):
         os.makedirs(p)
-    tstamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    #  tstamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    tstamp = datetime.datetime.now(datetime.UTC).strftime("%Y%m%d%H%M%S")
     inner_p = p + "/" + str(tstamp)
     os.makedirs(inner_p)
     out.to_csv(inner_p + "/scoring.csv")
 
-    pd.DataFrame([stop_time], columns=["runtime"]).to_csv(
-        inner_p + "/runtime.csv"
-    )  # dumps to file:
+    pd.DataFrame([stop_time], columns=["runtime"]).to_csv(inner_p + "/runtime.csv")  # dumps to file:
     with open(inner_p + "/config.yaml", "w") as f:
         OmegaConf.save(cfg, f)
-    pickle.dump(preds, open(inner_p + "/preds.p", "wb"))
+
+    with open(inner_p + "/preds.p", "wb") as f:
+        pickle.dump(preds, f)
+    # pickle.dump(preds, open(inner_p + "/preds.p", "wb"))

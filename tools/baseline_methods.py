@@ -41,13 +41,8 @@ def var_baseline(d, cfg, human_readable=False):
 
         # reformat to original caused causing lag:
         # :) einsum needed i guess
-        pred = np.stack(
-            [
-                pred.values[:, x].reshape(cfg.max_lag, n_vars).T
-                for x in range(pred.shape[1])
-            ]
-        )
-    except:
+        pred = np.stack([pred.values[:, x].reshape(cfg.max_lag, n_vars).T for x in range(pred.shape[1])])
+    except ValueError, RuntimeError:
         pred = np.zeros((n_vars, n_vars, cfg.max_lag))
         print("Fitting failed")
     out = summary_transform(pred, cfg.map_to_summary_graph)

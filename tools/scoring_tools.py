@@ -91,9 +91,7 @@ def score(preds, labs, remove_autoregressive=True, name="Result"):
             # this can sometimes happen if a limited time window is chosen
             continue
         else:
-            auroc_ind.append(
-                roc_auc_score(y_true=labs[x].flatten(), y_score=preds[x].flatten())
-            )
+            auroc_ind.append(roc_auc_score(y_true=labs[x].flatten(), y_score=preds[x].flatten()))
         f1_thresh, f1_score = f1_max(labs[x].flatten(), preds[x].flatten())
         f1_max_ind.append(f1_score)
 
