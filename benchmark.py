@@ -2,6 +2,7 @@ import time
 
 from hydra import compose, initialize
 from omegaconf import DictConfig
+
 from tools.scoring_tools import score
 from tools.tools import (
     benchmarking,

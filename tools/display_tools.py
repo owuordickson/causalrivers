@@ -1,13 +1,13 @@
-import matplotlib.pyplot as plt
 import geopandas as gpd
-import networkx as nx
 import matplotlib as mpl
+import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
 from celluloid import Camera
 from IPython.display import HTML
-from matplotlib.transforms import Affine2D
 from matplotlib.collections import PathCollection
-from matplotlib.lines import Line2D
+from matplotlib.transforms import Affine2D
+
 
 def plot_current_state_of_graph(
     G,
@@ -21,15 +21,15 @@ def plot_current_state_of_graph(
     save=False,
     river_map=0,
     ger_map=True,
-    emphasize=[],
+    emphasize=None,
     label=True,
     autozoom=None,
     width=1,
     show_edge_origin=False,
-    hardcode_colors=[],
+    hardcode_colors=None,
     ger_path="product/visualization/east_germany/east_german_map.shp",
     river_path="product/visualization/east_germany/river_east_german_map.shp",
-    extra_points=[],
+    extra_points=None,
     river_width=0.5,
     title="Rivers East Germany",
     pos=False,
@@ -40,12 +40,17 @@ def plot_current_state_of_graph(
 ):
     
     
-    #
+    if extra_points is None:
+        extra_points = []
+    if hardcode_colors is None:
+        hardcode_colors = []
+    if emphasize is None:
+        emphasize = []
     if not pos:
         pos = {x: np.flip(np.array(G.nodes[x]["p"][:2]).astype(float)) for x in G.nodes}
 
     if not ax:
-        fig, ax = plt.subplots(1, 1, figsize=fs)
+        _fig, ax = plt.subplots(1, 1, figsize=fs)
 
     if ger_map:
         fp = ger_path
@@ -104,12 +109,12 @@ def plot_current_state_of_graph(
                 x._transOffset = r+transoff    #ax.set_frame_on(True)
     if autozoom:
         ax.set_xlim(
-            min([pos[x][0] for x in pos.keys()]) - autozoom,
-            max([pos[x][0] for x in pos.keys()]) + autozoom,
+            min([pos[x][0] for x in pos]) - autozoom,
+            max([pos[x][0] for x in pos]) + autozoom,
         )
         ax.set_ylim(
-            min([pos[x][1] for x in pos.keys()]) - autozoom,
-            max([pos[x][1] for x in pos.keys()]) + autozoom,
+            min([pos[x][1] for x in pos]) - autozoom,
+            max([pos[x][1] for x in pos]) + autozoom,
         )
     else:
         if lim:
@@ -143,15 +148,15 @@ def plot_current_state_of_graph(
         plt.show()
 
 def simple_sample_display(sample_data):
-    fix, axs = plt.subplots(len(sample_data.T), 1, figsize=(3 * len(sample_data.T), 10))
-    for n, x in enumerate(sample_data.columns):  #
+    _fix, axs = plt.subplots(len(sample_data.T), 1, figsize=(3 * len(sample_data.T), 10))
+    for n, x in enumerate(sample_data.columns):
         sample_data[x].plot(ax=axs[n])
         axs[n].set_ylabel("m³/s")
     plt.show()
 
 
 def simple_sample_display_2(sample_data):
-    fig, axs = plt.subplots(len(sample_data.columns), 1)
+    _fig, axs = plt.subplots(len(sample_data.columns), 1)
     cmap = mpl.colormaps["plasma"]
     # Take colors at regular intervals spanning the colormap.
     for n, s in enumerate(sample_data.columns):
@@ -172,8 +177,8 @@ def fancy_plot(
     emph=19999,
     label_nodes=True
 ):
-    fig, axs = plt.subplots(3, 1, figsize=(12, 5))
-    for n, x in enumerate(sample_data.columns):  #
+    _fig, axs = plt.subplots(3, 1, figsize=(12, 5))
+    for n, x in enumerate(sample_data.columns):
         axs[n].plot(sample_data[x], linewidth=2, color=base_c[n + 1], alpha=0.8)
         axs[n].set_ylabel("m³/s", fontsize=15)
         position = (
@@ -221,9 +226,9 @@ def bare_fancy_plot(
     
     ):
 
-    fig, axs = plt.subplots(3, 1, figsize=(8, 5))
+    _fig, axs = plt.subplots(3, 1, figsize=(8, 5))
     labels = ["A", "B", "C"]
-    for n, x in enumerate(sample_data.columns):  #
+    for n, x in enumerate(sample_data.columns):
         axs[n].plot(sample_data[x], linewidth=3, color=base_c[n + 1], alpha=1)
         axs[n].set_ylabel(labels[n], fontsize=25)
         axs[n].set_xlabel(None)
@@ -246,8 +251,10 @@ def animate_ts(
     sample_data,
     steps=50,
     length=5000,
-    colors=["darkred", "darkblue", "darkgreen", "darkorange", "darkviolet"],
+    colors=None,
 ):
+    if colors is None:
+        colors = ["darkred", "darkblue", "darkgreen", "darkorange", "darkviolet"]
     fig, axs = plt.subplots(sample_data.shape[1], 1, figsize=(16,9))
     data = sample_data.apply(lambda x: np.log(x))
     for x in range(data.shape[1]):
