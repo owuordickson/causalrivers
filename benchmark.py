@@ -15,9 +15,7 @@ from tools.tools import (
 # Example script to benchmark causal discovery methods.
 def main(cfg: DictConfig):
 
-    if cfg.method.name == "var":
-        from tools.baseline_methods import var_baseline as cd_method
-    elif cfg.method.name == "tgraank":
+    if cfg.method.name == "tgraank":
         from tools.baseline_methods import var_tgraank as cd_method
     else:
         raise ValueError("SPECIFY AND LOAD YOUR OWN METHOD HERE")
