@@ -1,6 +1,6 @@
+import hashlib
 import json
 import pickle
-import hashlib
 from pathlib import Path
 
 # Path to the JSON run manifest that stores metadata about the datasets
@@ -38,7 +38,7 @@ def secure_load_pickle(file_path: Path):
                 if run.get("filepath") == path_key or run.get("filename") == file_path.name:
                     expected_hash = run.get("sha256")
                     break
-        except (json.JSONDecodeError, IOError) as e:
+        except (OSError, json.JSONDecodeError) as e:
             print(f"[INTEGRITY WARNING] Could not read manifest file: {e}")
 
     # 3. Handle a missing or non-matching hash signature safely
