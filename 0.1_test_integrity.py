@@ -18,3 +18,6 @@ def test_manifest_matches_local_files():
             # If it's a structural parsing error rather than an integrity block, that's fine for this test
             if "Integrity check failed" in str(e) or "Untrusted artifact" in str(e):
                 pytest.fail(f"Hash mismatch on active benchmark asset: {filename}")
+
+
+test_manifest_matches_local_files()

@@ -4,7 +4,18 @@ from pathlib import Path
 
 # Manifest tracking exact digests for all consumed artifacts
 DATA_MANIFEST = {
-    "confounder_3.p": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "1_random_3/east.p": "to-add sha",
+    "1_random_5/east.p": "to-add sha",
+    "close_3/east.p": "to-add sha",
+    "close_5/east.p": "to-add sha",
+    "confounder_3/east.p": "to-add sha",
+    "confounder_5/east.p": "to-add sha",
+    "debug_set_3/east.p": "to-add sha",
+    "debug_set_5/east.p": "to-add sha",
+    "random_3/east.p": "to-add sha",
+    "random_5/east.p": "to-add sha",
+    "root_cause_3/east.p": "to-add sha",
+    "root_cause_5/east.p": "to-add sha",
     # Add hashes for all other expected labels/predictions/product graphs here
 }
 
