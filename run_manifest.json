@@ -1,0 +1,20 @@
+{
+  "test_run": [
+    {
+      "run_id": "confounder_3_var",
+      "status": "new_baseline",
+      "environment": "Python 3.13.5 / Ubuntu Linux",
+      "so4gp_version": "1.0.8",
+      "notes": "For testing ONLY."
+    }
+  ],
+  "benchmark_runs": [
+    {
+      "run_id": "confounder_3_tgraank",
+      "status": "regenerated",
+      "environment": "Python 3.13.5 / Ubuntu Linux",
+      "so4gp_version": "1.0.8",
+      "notes": "Regenerated pair matching updated environment footprint."
+    }
+  ]
+}
