@@ -5,9 +5,10 @@
 
 
 *** DOWNLOAD PRODUCT ***
-1. Download product from: https://github.com/CausalRivers/benchmark/releases/download/First_release/product.zip
-2. unzip product
-3. rm product.zip
+1. cd benchmarks/causalrivers
+2. Download product from: https://github.com/CausalRivers/benchmark/releases/download/First_release/product.zip
+3. unzip product
+4. rm product.zip
 
 *** INSTALL LIBS ***
 python3 -m venv .venv_test
@@ -20,7 +21,7 @@ deactivate
 
 *** GENERATE DATASET ***
 1. .venv_test\Scripts\activate
-2. python3 generate_datasets.py
+2. python3 0_generate_datasets.py
 3. deactivate
 
 *** RUN BENCHMARK TEST ***
