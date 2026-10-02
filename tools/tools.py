@@ -102,7 +102,7 @@ def standard_preprocessing(
         resolution=cfg.resolution,
         interpolate=cfg.interpolate,
         subset_year=cfg.subset_year,
-        subset_month=cfg.subset_year,
+        subset_month=cfg.subset_month,
         subsample=cfg.subsample,
         normalize=cfg.normalize,
         remove_trailing_nans_early=cfg.remove_trailing_nans_early,
