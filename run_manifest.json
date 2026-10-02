@@ -8,22 +8,20 @@
       "notes": "Retained for provenance tracking; preserved without overwriting history."
     }
   ],
-  "test_run": [
-    {
-      "run_id": "confounder_3_var",
-      "status": "new_baseline",
-      "environment": "Python 3.13.5 / Ubuntu Linux",
-      "so4gp_version": "1.0.8",
-      "notes": "For testing ONLY."
-    }
-  ],
-  "benchmark_runs": [
+  "new_runs": [
     {
       "run_id": "confounder_3_tgraank",
       "status": "regenerated",
       "environment": "Python 3.13.5 / Ubuntu Linux",
       "so4gp_version": "1.0.8",
       "notes": "Regenerated pair matching updated environment footprint."
+    },
+    {
+      "run_id": "confounder_3_var",
+      "status": "testing lib",
+      "environment": "Python 3.13.5 / Ubuntu Linux",
+      "so4gp_version": "1.0.8",
+      "notes": "For testing ONLY."
     }
   ]
 }

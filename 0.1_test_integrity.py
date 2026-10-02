@@ -5,7 +5,7 @@ from benchmarks.causalrivers.tools.integrity import DATA_MANIFEST, secure_load_p
 
 def test_manifest_matches_local_files():
     """Asserts that all files matching the manifest have valid matching hashes."""
-    data_dir = Path("datasets/")  # Adjust to your actual data folder
+    data_dir = Path("/")  # Adjust to your actual data folder
 
     for filename, expected_hash in DATA_MANIFEST.items():
         target_file = data_dir / filename
