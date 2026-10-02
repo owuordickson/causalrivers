@@ -11,13 +11,10 @@ from omegaconf import DictConfig
 sys.path.append("..")
 from tools.graph_sampling_tools import (
     add_one_random_node,
-    combine_far_apart,
-    get_all_sink_cases,
     get_all_subgraphs,
     get_longest_path,
-    select_confounder_samples,
 )
-from tools.integrity import DATA_MANIFEST, secure_load_pickle, save_manifest_to_integrity_file
+from tools.integrity import secure_load_pickle
 
 # Path to the JSON run manifest that stores metadata about the generated datasets
 MANIFEST_PATH = Path("run_manifest.json")
@@ -72,7 +69,6 @@ def save_subgraphs_to_pickle(
     relative_path_str = file_path.as_posix()
 
     # Update global tracking schemas
-    DATA_MANIFEST[relative_path_str] = file_hash
     update_run_manifest(relative_path_str, file_hash, "regenerated")
 
 
@@ -208,9 +204,6 @@ def main(cfg: DictConfig):
         save_subgraphs_to_pickle(bav_G, bav, "bav", save_path_structure)
         if flood:
             save_subgraphs_to_pickle(flood_G, flood, "flood", save_path_structure)
-
-    # Update sha25 to integrity file
-    save_manifest_to_integrity_file()
 
 
 if __name__ == "__main__":
