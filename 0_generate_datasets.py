@@ -17,7 +17,7 @@ from tools.graph_sampling_tools import (
     get_longest_path,
     select_confounder_samples,
 )
-from tools.integrity import DATA_MANIFEST, secure_load_pickle
+from tools.integrity import DATA_MANIFEST, secure_load_pickle, save_manifest_to_integrity_file
 
 # Path to the JSON run manifest that stores metadata about the generated datasets
 MANIFEST_PATH = Path("run_manifest.json")
@@ -48,11 +48,10 @@ def save_subgraphs_to_pickle(
 ) -> None:
     """
     Save subgraphs of a main graph to a pickle file, computes its SHA-256 key,
-    and updates the dynamic manifest mapping context.
+    and updates the dynamic manifest mapping context using full relative path keys.
     """
     file_path = save_path_structure / f"{name}.p"
 
-    # Formats copy modifications safely via a context manager to address SIM115
     try:
         with open(file_path, "wb") as f:
             pickle.dump(
@@ -62,22 +61,26 @@ def save_subgraphs_to_pickle(
     except (IOError, ValueError, RuntimeError) as e:
         raise RuntimeError(f"Error saving pickle file: {file_path}") from e
 
-    # Compute SHA-256 key of the newly generated dataset file
+    # Compute SHA-256 key
     hasher = hashlib.sha256()
     with open(file_path, "rb") as f:
         hasher.update(f.read())
     file_hash = hasher.hexdigest()
 
-    # Append data profile details dynamically to runtime and manifest configurations
-    DATA_MANIFEST[file_path.name] = file_hash
-    update_run_manifest(file_path, file_hash, "regenerated")
+    # Convert the file path to a standardized relative string representation
+    # .as_posix() guarantees forward slashes (/) across Windows and Linux
+    relative_path_str = file_path.as_posix()
+
+    # Update global tracking schemas
+    DATA_MANIFEST[relative_path_str] = file_hash
+    update_run_manifest(relative_path_str, file_hash, "regenerated")
 
 
-def update_run_manifest(filename: str, file_hash: str, status: str) -> None:
+def update_run_manifest(file_path_str: str, file_hash: str, status: str) -> None:
     """
-    Appends generated dataset metadata to the tracked provenance system.
+    Appends generated dataset metadata to the tracked provenance system using unique paths.
     """
-    manifest_data = {"historical_runs": [], "new_runs": []}
+    manifest_data = {"historical_runs": [], "test_run": [], "benchmark_runs": [], "data_runs": []}
 
     if MANIFEST_PATH.exists():
         try:
@@ -86,10 +89,10 @@ def update_run_manifest(filename: str, file_hash: str, status: str) -> None:
         except (json.JSONDecodeError, IOError):
             pass
 
-    # Avoid duplicate additions to the logs
-    if not any(run.get("filename") == filename for run in manifest_data["new_runs"]):
-        manifest_data["new_runs"].append({
-            "filename": filename,
+    # Uniquely match paths instead of identical filenames to prevent overwriting
+    if not any(run.get("filepath") == file_path_str for run in manifest_data["data_runs"]):
+        manifest_data["data_runs"].append({
+            "filepath": file_path_str,
             "sha256": file_hash,
             "status": status,
             "so4gp_version": "1.0.8"
@@ -205,6 +208,9 @@ def main(cfg: DictConfig):
         save_subgraphs_to_pickle(bav_G, bav, "bav", save_path_structure)
         if flood:
             save_subgraphs_to_pickle(flood_G, flood, "flood", save_path_structure)
+
+    # Update sha25 to integrity file
+    save_manifest_to_integrity_file()
 
 
 if __name__ == "__main__":
