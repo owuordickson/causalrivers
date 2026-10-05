@@ -125,6 +125,8 @@ def main(cfg: DictConfig):
                 "root_cause",
                 "confounder",
                 "close",
+                "sink",
+                "disjoint"
             ]:
                 to_generate.append((y, x))
     else:
