@@ -4,6 +4,7 @@ import pickle
 
 import numpy as np
 import pandas as pd
+from integrity import secure_load_pickle
 from omegaconf import OmegaConf
 
 
@@ -102,7 +103,7 @@ def standard_preprocessing(
         resolution=cfg.resolution,
         interpolate=cfg.interpolate,
         subset_year=cfg.subset_year,
-        subset_month=cfg.subset_year,
+        subset_month=cfg.subset_month,
         subsample=cfg.subsample,
         normalize=cfg.normalize,
         remove_trailing_nans_early=cfg.remove_trailing_nans_early,
@@ -130,8 +131,8 @@ def load_joint_samples(cfg, index_col="datetime", preprocessing=None):
     This is however slower.
     """
     with open(cfg.label_path, "rb") as f:
-        data = pickle.load(f)
-    # data = pickle.load(open(cfg.label_path, "rb"))
+        data = secure_load_pickle(f)
+
     # restrict which unique sample you want to process
     if cfg.restrict_to >= 0:
         data = data[cfg.restrict_to : cfg.restrict_to + 1]

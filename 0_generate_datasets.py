@@ -1,3 +1,5 @@
+import hashlib
+import json
 import pickle
 import sys
 from pathlib import Path
@@ -15,11 +17,7 @@ from tools.graph_sampling_tools import (
     get_longest_path,
     select_confounder_samples,
 )
-
-
-class AbortError(Exception):
-    pass
-
+from tools.integrity import secure_load_pickle
 
 # Here we generate all sub-sampling strategies that we evaluate and some additional ones.
 # Additional ones might be added according to need.
@@ -33,43 +31,37 @@ class AbortError(Exception):
 # - One random node + connected graph
 # - Disjoint groups
 
+# Path to the JSON run manifest that stores metadata about the generated datasets
+MANIFEST_PATH = Path("run_manifest.json")
+
 
 def load_pickle(path: str, verbose: bool = False) -> nx.Graph:
     """
-    Loads a pickle file and tests the graph.
-    Args:
-        path (str): Path to the pickle file.
-    Returns:
-        nx.Graph: The loaded graph.
+    Loads a pickle file and verifies its integrity before deserialization.
     """
     _path = Path(path)
-    if not _path.exists():
-        raise FileNotFoundError(f"File not found: {path}. Please check if you have downloaded the *product* dataset. Please check the readme!")
+    if not _path.exists() or not _path.is_file() or _path.suffix != ".p":
+        raise FileNotFoundError(
+            f"File validation failed: {path}. Please check if you have downloaded the *product* dataset."
+        )
 
-    if not _path.is_file():
-        raise FileNotFoundError(f"Path is not a file: {path}. Please check if you have downloaded the *product* dataset. Please check the readme!")
-
-    if not _path.suffix == ".p":
-        raise FileNotFoundError(f"File is not a pickle file: {path}. Please check if you have downloaded the *product* dataset. Please check the readme!")
-
-    try:
-        with open(_path, "rb") as f:
-            G = pickle.load(f)
-    except Exception as e:
-        raise AbortError(f"Error loading pickle file: {path}. Please check if you have downloaded the *product* dataset. Please check the readme!") from e
+    # Replaces raw pickle.load with secure manifest hashing
+    G = secure_load_pickle(_path)
 
     if verbose:
-        print(f"Nodes in G[{_path.name}]: {len(G.nodes)!s}")
-        print(f"Edges in G[{_path.name}]: {len(G.edges)!s}")
+        print(f"Nodes in G[{_path.name}]: {len(G.nodes)}")
+        print(f"Edges in G[{_path.name}]: {len(G.edges)}")
 
     return G
 
 
 def save_subgraphs_to_pickle(main_G: nx.Graph, sub_G: nx.Graph, name: str, save_path_structure: Path) -> None:
     """
-    Save subgraphs of a main graph to a pickle file.
+    Save subgraphs of the main graph to a pickle file.
     This function takes a main graph and a subgraph, extracts the subgraphs from the main graph based on the nodes in the subgraph,
-    and saves them to a pickle file.
+    and saves them to a pickle file. Save subgraphs of a main graph to a pickle file, computes its SHA-256 key,
+    and updates the dynamic manifest mapping context using full relative path keys.
+
     Args:
         main_G (nx.Graph): The main graph from which subgraphs will be extracted.
         sub_G (nx.Graph): The subgraph containing the nodes to extract from the main graph.
@@ -78,14 +70,55 @@ def save_subgraphs_to_pickle(main_G: nx.Graph, sub_G: nx.Graph, name: str, save_
     Returns:
         None
     """
+    file_path = save_path_structure / f"{name}.p"
+
     try:
-        with open(save_path_structure / f"{name}.p", "wb") as f:
+        with open(file_path, "wb") as f:
             pickle.dump(
                 [nx.subgraph(main_G, x).copy() for x in sub_G],
                 f,
             )
-    except Exception as e:
-        raise AbortError(f"Error saving pickle file: {save_path_structure / f'{name}.p'}. Please check the readme!") from e
+    except (OSError, ValueError, RuntimeError) as e:
+        raise RuntimeError(f"Error saving pickle file: {file_path}") from e
+
+    # Compute SHA-256 key
+    hasher = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        hasher.update(f.read())
+    file_hash = hasher.hexdigest()
+
+    # Convert the file path to a standardized relative string representation
+    # .as_posix() guarantees forward slashes (/) across Windows and Linux
+    relative_path_str = file_path.as_posix()
+
+    # Update global tracking schemas
+    update_run_manifest(relative_path_str, file_hash, "regenerated")
+
+
+def update_run_manifest(file_path_str: str, file_hash: str, status: str) -> None:
+    """
+    Appends generated dataset metadata to the tracked provenance system using unique paths.
+    """
+    manifest_data = {"historical_runs": [], "test_run": [], "benchmark_runs": [], "data_runs": []}
+
+    if MANIFEST_PATH.exists():
+        try:
+            with open(MANIFEST_PATH, "r") as f:
+                manifest_data = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            pass
+
+    # Uniquely match paths instead of identical filenames to prevent overwriting
+    if not any(run.get("filepath") == file_path_str for run in manifest_data["data_runs"]):
+        manifest_data["data_runs"].append({
+            "filepath": file_path_str,
+            "sha256": file_hash,
+            "status": status,
+            "so4gp_version": "1.0.8"
+        })
+
+    with open(MANIFEST_PATH, "w") as f:
+        json.dump(manifest_data, f, indent=2)
 
 
 def main(cfg: DictConfig):
@@ -138,7 +171,7 @@ def main(cfg: DictConfig):
     print("-" * 50)
     print("Generating datasets for the following strategies:")
     for x in to_generate:
-        print("\tStrategy: " + x[0] + " with " + str(x[1]) + " variables.")
+        print(f"\tStrategy: {x[0]} with {x[1]} variables.")
     print("-" * 50)
 
     ##### Sampling strategies
