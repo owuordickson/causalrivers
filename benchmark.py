@@ -56,5 +56,4 @@ if __name__ == "__main__":
         _cfg = compose(config_name="benchmark.yaml", overrides=cli_overrides)
         print("Resolved Configuration Profile:")
         print(_cfg)
-
     main(_cfg)
