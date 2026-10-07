@@ -148,7 +148,7 @@ def check_corr_character(sub_G, measure=None):
 
 def select_confounder_samples(G, n_vars):
     """
-    Gets all samples from G where a single node has multiple sucessors and removes it.
+    Gets all samples from G where a single node has multiple sucessors.
     """
     conf = [x for x in G.nodes if len(list(G.successors(x))) > 1]
     potential_list = get_all_subgraphs(G, n_vars=n_vars)

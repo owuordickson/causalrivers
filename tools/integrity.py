@@ -4,7 +4,7 @@ import pickle
 from pathlib import Path
 
 # Path to the JSON run manifest that stores metadata about the datasets
-MANIFEST_PATH = Path("../run_manifest.json")
+MANIFEST_PATH = Path(__file__).resolve().parents[1] / "run_manifest.json" # Path("../run_manifest.json")
 
 
 
@@ -43,10 +43,8 @@ def secure_load_pickle(file_path: Path):
 
     # 3. Handle a missing or non-matching hash signature safely
     if not expected_hash:
-        print(f'\n[INTEGRITY MANIFEST NOTIFICATION] Path missing from manifest. Allowing initial run:\n'
+        raise ValueError(f'\n[INTEGRITY MANIFEST NOTIFICATION] Path missing from manifest. Allowing initial run:\n'
               f'  Path: {path_key}\n  Hash: {computed_hash}\n')
-        with open(file_path, "rb") as f:
-            return pickle.load(f)
 
     if computed_hash != expected_hash:
         raise ValueError(

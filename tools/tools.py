@@ -1,10 +1,11 @@
 import datetime
 import os
 import pickle
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from integrity import secure_load_pickle
+from .integrity import secure_load_pickle
 from omegaconf import OmegaConf
 
 
@@ -18,7 +19,8 @@ def remove_trailing_nans(sample_prep):
 
     if len(sample_prep) == 0:
         # random case that everything is empty. This can happen when selecting a window.
-        print("EMPTY SAMPLE DETECTED")
+        # print("EMPTY SAMPLE DETECTED")
+        raise ValueError("Empty sample detected")
     return sample_prep
 
 
@@ -85,7 +87,11 @@ def preprocess_data(
         sample_data = sample_data.loc[(sample_data.index.month.isin(subset_month)) & (sample_data.index.year == subset_year)]
     sample_data = sample_data.iloc[::subsample, :]
     if normalize:
+        # Perform min-max normalization
         sample_data = (sample_data - sample_data.min()) / (sample_data.max() - sample_data.min())
+
+        # 🚀 Fix: Convert division-by-zero NaNs from constant columns into 0.0
+        sample_data = sample_data.fillna(0.0)
     if interpolate:
         sample_data = sample_data.interpolate()
     return sample_data
@@ -130,8 +136,7 @@ def load_joint_samples(cfg, index_col="datetime", preprocessing=None):
     Importantly, if you struggle with ram it migt be worth to load the samples individually as in 2_tutorial_benchmarking.
     This is however slower.
     """
-    with open(cfg.label_path, "rb") as f:
-        data = secure_load_pickle(f)
+    data = secure_load_pickle(Path(cfg.label_path))
 
     # restrict which unique sample you want to process
     if cfg.restrict_to >= 0:

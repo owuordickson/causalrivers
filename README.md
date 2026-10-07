@@ -85,7 +85,7 @@ We use Hydra to organize preprocessing and method Hyperparameters. Along with th
 We keep a single baseline strategy (VAR) here that is used as a placeholder and can be replaced with your own method. To check how the scoring works simply run:
 
 ```bash
-python 3_benchmark.py
+python benchmark.py
 ```
 
 This will run a var strategy with specified preprocessing on the "confounder 3" dataset and reproduce the scoring. For the remaining experimental results we refer to [the experiments repo](https://github.com/CausalRivers/experiments)
@@ -93,7 +93,7 @@ This will run a var strategy with specified preprocessing on the "confounder 3" 
 If you want to score your own method on a specific set of graph samples you can simply replace the baseline_method, configure it with hydra and run:
 
 ```bash
-python 3_benchmark.py label_path=datasets/random_3/east.p data_path=product/rivers_ts_east_germany.csv method=var  data_preprocess.normalize=False  data_preprocess.resolution=6H method.var_absolute_values=False method.max_lag=5
+python benchmark.py label_path=datasets/random_3/east.p data_path=product/rivers_ts_east_germany.csv method=var  data_preprocess.normalize=False  data_preprocess.resolution=6H method.var_absolute_values=False method.max_lag=5
 ```
 
 Of course you can also use any routine from  [the experiments repo](https://github.com/CausalRivers/experiments), especially concerning Grid searches and result aggregations.

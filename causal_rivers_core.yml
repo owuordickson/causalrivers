@@ -46,7 +46,7 @@ dependencies:
   - ptyprocess=0.7.0=pyhd8ed1ab_1
   - pure_eval=0.2.3=pyhd8ed1ab_1
   - pygments=2.19.2=pyhd8ed1ab_0
-  - python=3.13.5=h4612cfd_100_cp313
+  - python=3.14.5=h80e0c04_100_cp314
   - python-dateutil=2.9.0.post0=pyhe01879c_2
   - python_abi=3.13=0_cp313
   - pyzmq=26.2.0=py313h6a678d5_0

@@ -1,7 +1,5 @@
 import numpy as np
 import pandas as pd
-import torch
-from so4gp.algorithms import TGRAANK
 from statsmodels.tsa.api import VAR
 
 
@@ -19,10 +17,13 @@ def summary_transform(pred, opt):
     return prediction
 
 
-def var_baseline(d, cfg, human_readable=False):
+def var_baseline(input_d, cfg, human_readable=False):
     """
     Simple Granger based strategy that selects based on absolute parameter values.
     """
+    # 🚀 The Fix: Create an isolated copy of the DataFrame before modifying the index
+    d = input_d.copy()
+
     n_vars = d.values.shape[-1]
 
     d.index = pd.DatetimeIndex(d.index.values, freq=d.index.inferred_freq)
@@ -53,6 +54,9 @@ def var_baseline(d, cfg, human_readable=False):
 
 
 def var_tgraank(d, cfg):
+    import torch
+    from so4gp.algorithms import TGRAANK
+
     device = "cuda" if torch.cuda.is_available() else "cpu"
     mine_obj = TGRAANK(d, device=device)
     corr_df = mine_obj.discover_causal_relationships(max_lag=cfg.max_lag)
