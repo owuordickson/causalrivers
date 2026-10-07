@@ -1,13 +1,4 @@
 {
-  "historical_runs": [
-    {
-      "run_id": "run_001_thru_008",
-      "status": "historical",
-      "environment": "Unknown (Legacy Production Baseline)",
-      "so4gp_version": "historical_unrecorded",
-      "notes": "Retained for provenance tracking; preserved without overwriting history."
-    }
-  ],
   "test_run": [
     {
       "run_id": "confounder_3_var",

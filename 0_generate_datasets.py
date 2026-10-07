@@ -99,7 +99,7 @@ def update_run_manifest(file_path_str: str, file_hash: str, status: str) -> None
     """
     Appends generated dataset metadata to the tracked provenance system using unique paths.
     """
-    manifest_data = {"historical_runs": [], "test_run": [], "benchmark_runs": [], "data_runs": []}
+    manifest_data = {"test_run": [], "benchmark_runs": [], "data_runs": []}
 
     if MANIFEST_PATH.exists():
         try:
