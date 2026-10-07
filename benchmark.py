@@ -1,5 +1,5 @@
+import sys
 import time
-
 from hydra import compose, initialize
 from omegaconf import DictConfig
 
@@ -48,8 +48,13 @@ def main(cfg: DictConfig):
 
 
 if __name__ == "__main__":
+    # 🚀 The Fix: Collect runtime CLI arguments directly from the terminal stream
+    cli_overrides = sys.argv[1:]
+
     with initialize(version_base=None, config_path="config"):
-        _cfg = compose(config_name="benchmark.yaml")
+        # Explicitly forward the overrides array into Hydra's composition boundary
+        _cfg = compose(config_name="benchmark.yaml", overrides=cli_overrides)
+        print("Resolved Configuration Profile:")
         print(_cfg)
 
     main(_cfg)
