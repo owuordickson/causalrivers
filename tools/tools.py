@@ -5,8 +5,9 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from .integrity import secure_load_pickle
 from omegaconf import OmegaConf
+
+from .integrity import secure_load_pickle
 
 
 def remove_trailing_nans(sample_prep):
