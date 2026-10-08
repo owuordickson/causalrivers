@@ -158,7 +158,6 @@ def select_confounder_samples(G, n_vars):
         candidates = [x for x in potential_list if con in x]
         for succ in list(G.successors(con)):
             candidates = [x for x in candidates if succ in x]
-        # remove confounder from set
         samples.append([tuple([y for y in x]) for x in candidates])
     samples = [item for sublist in samples for item in sublist]
     return samples

@@ -10,19 +10,37 @@ from omegaconf import OmegaConf
 from .integrity import secure_load_pickle
 
 
-def remove_trailing_nans(sample_prep):
-    """
-    Removes samples that were not removed by interpolate.
-    """
-    check_trailing_nans = np.where(sample_prep.isnull().values.any(axis=1) == 0)[0]
-    if len(check_trailing_nans) != 0:  # A ts is completely 0:
-        sample_prep = sample_prep[check_trailing_nans.min() : check_trailing_nans.max() + 1]
+def remove_trailing_nans(sample_prep: pd.DataFrame) -> pd.DataFrame:
+    """Remove leading and trailing rows containing missing values.
 
-    if len(sample_prep) == 0:
-        # random case that everything is empty. This can happen when selecting a window.
-        # print("EMPTY SAMPLE DETECTED")
-        raise ValueError("Empty sample detected")
-    return sample_prep
+    Rows containing NaNs are excluded when fully valid rows are
+    available. The function retains the original sample if no fully
+    valid rows exist, allowing the experiment to continue.
+
+    Args:
+        sample_prep: Preprocessed time-series sample.
+
+    Returns:
+        A DataFrame containing the range of fully valid rows, or the
+        original sample if no fully valid rows are available.
+    """
+    if sample_prep.empty:
+        return sample_prep
+
+    # Identify rows without missing values.
+    valid_rows = np.flatnonzero(
+        ~sample_prep.isna().any(axis=1).to_numpy()
+    )
+
+    # If no fully valid rows exist, retain the sample rather than
+    # stopping the experiment.
+    if valid_rows.size == 0:
+        return sample_prep
+
+    # Keep the range from the first to the last fully valid row.
+    return sample_prep.iloc[
+        valid_rows.min():valid_rows.max() + 1
+    ]
 
 
 """
@@ -88,11 +106,23 @@ def preprocess_data(
         sample_data = sample_data.loc[(sample_data.index.month.isin(subset_month)) & (sample_data.index.year == subset_year)]
     sample_data = sample_data.iloc[::subsample, :]
     if normalize:
-        # Perform min-max normalization
-        sample_data = (sample_data - sample_data.min()) / (sample_data.max() - sample_data.min())
+        # Perform min-max normalization while preserving genuine missing observations.
+        col_min = sample_data.min()
+        col_max = sample_data.max()
+        col_range = col_max - col_min
 
-        # 🚀 Fix: Convert division-by-zero NaNs from constant columns into 0.0
-        sample_data = sample_data.fillna(0.0)
+        sample_data = (sample_data - col_min) / col_range
+
+        # Replace NaNs only for columns with finite, constant values.
+        # Genuine missing observations remain NaN for subsequent interpolation
+        # or missing-value rejection.
+        constant_cols = (
+                col_min.notna()
+                & col_max.notna()
+                & col_range.eq(0)
+        )
+
+        sample_data.loc[:, constant_cols] = 0.0
     if interpolate:
         sample_data = sample_data.interpolate()
     return sample_data
