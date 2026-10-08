@@ -59,5 +59,5 @@ def var_tgraank(d, cfg):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     mine_obj = TGRAANK(d, device=device)
-    corr_df = mine_obj.discover_causal_relationships(max_lag=cfg.max_lag)
+    corr_df = mine_obj.get_lagged_dependencies(max_lag=cfg.max_lag)
     return corr_df
