@@ -114,7 +114,6 @@ def update_run_manifest(file_path_str: str, file_hash: str, status: str) -> None
             "filepath": file_path_str,
             "sha256": file_hash,
             "status": status,
-            "so4gp_version": "1.0.8"
         })
 
     with open(MANIFEST_PATH, "w") as f:

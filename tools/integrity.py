@@ -42,11 +42,11 @@ def secure_load_pickle(file_path: Path):
             print(f"[INTEGRITY WARNING] Could not read manifest file: {e}")
 
     # 3. Handle a missing or non-matching hash signature safely
-    if not expected_hash:
+    if expected_hash is None:
         raise ValueError(f'\n[INTEGRITY MANIFEST NOTIFICATION] Path missing from manifest. Allowing initial run:\n'
               f'  Path: {path_key}\n  Hash: {computed_hash}\n')
 
-    if computed_hash != expected_hash:
+    if computed_hash.upper()  != expected_hash.upper() :
         raise ValueError(
             f"Integrity check failed for {path_key}!\n"
             f"Expected: {expected_hash}\n"
