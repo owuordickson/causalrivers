@@ -2,6 +2,8 @@
 
 import hashlib
 import json
+import pickle
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -135,6 +137,52 @@ class IntegrityTests(unittest.TestCase):
                     spy.assert_not_called()
                 target.write_bytes(original)
 
+    def test_reconstructed_rescore_checks_node_order_and_scores_real_fixture(self):
+        from rescore import rescore
+
+        run = self.root / "results/reconstructed-run"
+        run.mkdir(parents=True)
+        (run / "config.yaml").write_text(
+            "label_path: datasets/sample.p\nrestrict_to: -1\nremove_diagonal: true\nmethod:\n  name: fixture\n"
+        )
+        (run / "runtime.csv").write_text("runtime\n1\n")
+        (run / "scoring.csv").write_text("Metric,fixture\nAUROC,0.5\n")
+        graph = nx.DiGraph([(1, 2)])
+        recovered = self.root / "datasets/recovered.p"
+        recovered.write_bytes(pickle.dumps([graph]))
+        self.write_manifest(
+            {
+                "filepath": "datasets/recovered.p",
+                "sha256": hashlib.sha256(recovered.read_bytes()).hexdigest(),
+            }
+        )
+        (self.root / "tools").mkdir()
+        (self.root / "tools/scoring_tools.py").write_text("fixture scorer identity")
+        for names in (["2", "1"], ["1", "2"]):
+            predictions = [pd.DataFrame([[0, 0.2], [0.8, 0]], columns=names, index=names)]
+            (run / "preds.p").write_bytes(pickle.dumps(predictions))
+            artifacts = {
+                name: {
+                    "filepath": (run / name).relative_to(self.root).as_posix(),
+                    "sha256": hashlib.sha256((run / name).read_bytes()).hexdigest(),
+                }
+                for name in ("config.yaml", "runtime.csv", "scoring.csv", "preds.p")
+            }
+            record = {
+                "artifacts": artifacts,
+                "inputs": {"labels": {"filepath": "datasets/sample.p", "sha256": self.digest}},
+            }
+            (run / "provenance.json").write_text(json.dumps(record))
+            output = self.root / "results/fixture-rescore"
+            if names == ["2", "1"]:
+                with self.assertRaisesRegex(ValueError, "node identities and order"):
+                    rescore(run, output, recovered)
+                self.assertFalse(output.exists())
+            else:
+                with patch("rescore.environment_record", return_value={"mode": "test"}):
+                    scored = rescore(run, output, recovered)
+                self.assertEqual(scored.loc["AUROC"].iloc[0], 1)
+
 
 class PreprocessingTests(unittest.TestCase):
     def data(self, values):
@@ -189,6 +237,28 @@ class PreprocessingTests(unittest.TestCase):
 
 
 class MethodAndScorerTests(unittest.TestCase):
+    def test_tgraank_isolates_upstream_dataframe_mutation(self):
+        from tools.baseline_methods import var_tgraank
+
+        data = pd.DataFrame({"1": [1.0, 2.0, 3.0], "2": [3.0, 2.0, 1.0]})
+        before = data.copy(deep=True)
+
+        class MutatingTGRAANK:
+            def __init__(self, frame, device):
+                frame.loc[-1] = frame.columns
+
+            def get_lagged_dependencies(self, max_lag):
+                return np.zeros((2, 2))
+
+        modules = {
+            "torch": SimpleNamespace(cuda=SimpleNamespace(is_available=lambda: False)),
+            "so4gp.algorithms": SimpleNamespace(TGRAANK=MutatingTGRAANK),
+        }
+        with patch.dict(sys.modules, modules):
+            prediction = var_tgraank(data, SimpleNamespace(max_lag=1))
+        self.assertEqual(prediction.shape, (2, 2))
+        pd.testing.assert_frame_equal(data, before)
+
     def test_var_preserves_input_and_produces_effect_by_cause_matrix(self):
         from tools.baseline_methods import var_baseline
 

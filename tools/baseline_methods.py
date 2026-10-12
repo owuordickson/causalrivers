@@ -42,7 +42,9 @@ def var_baseline(input_d, cfg, human_readable=False):
 
         # reformat to original caused causing lag:
         # :) einsum needed i guess
-        pred = np.stack([pred.values[:, x].reshape(cfg.max_lag, n_vars).T for x in range(pred.shape[1])])
+        pred = np.stack(
+            [pred.values[:, x].reshape(cfg.max_lag, n_vars).T for x in range(pred.shape[1])]
+        )
     except (ValueError, RuntimeError):
         pred = np.zeros((n_vars, n_vars, cfg.max_lag))
         print("Fitting failed")
@@ -58,6 +60,7 @@ def var_tgraank(d, cfg):
     from so4gp.algorithms import TGRAANK
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    mine_obj = TGRAANK(d, device=device)
+    # DataGP adds a header row to DataFrame inputs; isolate that library mutation.
+    mine_obj = TGRAANK(d.copy(deep=True), device=device)
     corr_df = mine_obj.get_lagged_dependencies(max_lag=cfg.max_lag)
     return corr_df

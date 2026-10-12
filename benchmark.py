@@ -26,7 +26,17 @@ def main(cfg: DictConfig):
     start = time.time()
     print("Loading data...")
     # First, we load the full dataset from path and preprocess according to config..
-    test_data, test_labels = load_joint_samples(cfg, preprocessing=standard_preprocessing if cfg.dt_preprocess else None)
+    test_data, test_labels = load_joint_samples(
+        cfg, preprocessing=standard_preprocessing if cfg.dt_preprocess else None
+    )
+    selection = {
+        "restrict_to": cfg.restrict_to,
+        "sample_count": len(test_data),
+        "nodes": [[str(c) for c in sample.columns] for sample in test_data],
+        "rows": [len(sample) for sample in test_data],
+        "time_ranges": [[str(sample.index[0]), str(sample.index[-1])] for sample in test_data],
+        "capture": "before method invocation",
+    }
 
     # Then we simply run the specified method on all samples.
     print("Performing Causal Discovery...")
@@ -47,11 +57,10 @@ def main(cfg: DictConfig):
         from tools.provenance import environment_record, write_run_record
 
         write_run_record(
-            run_path, cfg, "python benchmark.py " + " ".join(sys.argv[1:]),
-            {"restrict_to": cfg.restrict_to, "sample_count": len(test_data),
-             "nodes": [[str(c) for c in sample.columns] for sample in test_data],
-             "rows": [len(sample) for sample in test_data],
-             "time_ranges": [[str(sample.index[0]), str(sample.index[-1])] for sample in test_data]},
+            run_path,
+            cfg,
+            "python benchmark.py " + " ".join(sys.argv[1:]),
+            selection,
             environment_record(),
         )
     print("Done", stop_time)

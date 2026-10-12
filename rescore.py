@@ -14,7 +14,7 @@ from tools.scoring_tools import score
 from tools.tools import graph_to_label_tensor
 
 
-def rescore(run, output):
+def rescore(run, output, labels_override=None):
     run = artifact_path(run)
     output = artifact_path(output)
     if output.exists():
@@ -38,12 +38,29 @@ def rescore(run, output):
     label_entry = record["inputs"]["labels"]
     if artifact_key(config.label_path) != artifact_key(label_entry["filepath"]):
         raise ValueError("Config and provenance label paths differ")
-    graphs = secure_load_pickle(label_entry["filepath"], label_entry["sha256"])
+    if labels_override is not None:
+        label_entry = file_record(labels_override)
+        # An override must have its own tracked integrity-manifest entry.
+        graphs = secure_load_pickle(labels_override)
+    else:
+        graphs = secure_load_pickle(label_entry["filepath"], label_entry["sha256"])
     if config.restrict_to >= 0:
         graphs = graphs[config.restrict_to : config.restrict_to + 1]
     labels = [graph_to_label_tensor(graph) for graph in graphs]
     pred_entry = artifacts["preds.p"]
     predictions = secure_load_pickle(pred_entry["filepath"], pred_entry["sha256"])
+    if labels_override is not None:
+        if len(predictions) != len(graphs):
+            raise ValueError("Recovered selection size differs from historical predictions")
+        for prediction, graph in zip(predictions, graphs, strict=True):
+            expected_nodes = [str(node) for node in sorted(graph.nodes)]
+            if not isinstance(prediction, pd.DataFrame) or (
+                list(map(str, prediction.columns)) != expected_nodes
+                or list(map(str, prediction.index)) != expected_nodes
+            ):
+                raise ValueError(
+                    "Recovered labels do not match prediction node identities and order"
+                )
     result = score(
         predictions, labels, remove_autoregressive=config.remove_diagonal, name=config.method.name
     )
@@ -55,6 +72,8 @@ def rescore(run, output):
     report = {
         "run": artifact_key(run),
         "provenance_scope": record.get("provenance_scope", "Recorded executed run"),
+        "scored_labels": label_entry,
+        "labels_override": labels_override is not None,
         "run_provenance": file_record(run / "provenance.json"),
         "scorer": file_record("tools/scoring_tools.py"),
         "environment": environment_record(),
@@ -87,5 +106,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", required=True)
     parser.add_argument("--output", required=True, help="New benchmark-relative output directory")
+    parser.add_argument(
+        "--labels", help="Verified reconstructed labels; node order must match predictions"
+    )
     args = parser.parse_args()
-    rescore(args.run, args.output)
+    rescore(args.run, args.output, args.labels)
