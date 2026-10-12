@@ -89,7 +89,9 @@ def save_subgraphs_to_pickle(main_G: nx.Graph, sub_G: nx.Graph, name: str, save_
 
     # Convert the file path to a standardized relative string representation
     # .as_posix() guarantees forward slashes (/) across Windows and Linux
-    relative_path_str = file_path.as_posix()
+    from tools.integrity import artifact_key
+
+    relative_path_str = artifact_key(file_path)
 
     # Update global tracking schemas
     update_run_manifest(relative_path_str, file_hash, "regenerated")
@@ -235,6 +237,6 @@ def main(cfg: DictConfig):
 
 if __name__ == "__main__":
     with initialize(version_base=None, config_path="config"):
-        _cfg = compose(config_name="data_sampling.yaml")
+        _cfg = compose(config_name="data_sampling.yaml", overrides=sys.argv[1:])
         print(_cfg)
     main(_cfg)

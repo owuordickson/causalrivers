@@ -7,35 +7,31 @@ import numpy as np
 import pandas as pd
 from omegaconf import OmegaConf
 
-from .integrity import secure_load_pickle
+from .integrity import artifact_path, secure_load_pickle
 
 
 def remove_trailing_nans(sample_prep: pd.DataFrame) -> pd.DataFrame:
     """Remove leading and trailing rows containing missing values.
 
-    Rows containing NaNs are excluded when fully valid rows are
-    available. The function retains the original sample if no fully
-    valid rows exist, allowing the experiment to continue.
+    Interior gaps remain available for explicit interpolation or rejection.
+    Empty samples and samples without any fully finite row are unusable.
 
     Args:
         sample_prep: Preprocessed time-series sample.
 
     Returns:
-        A DataFrame containing the range of fully valid rows, or the
-        original sample if no fully valid rows are available.
+        A DataFrame between the first and last fully finite rows.
     """
     if sample_prep.empty:
-        return sample_prep
+        raise ValueError("Unusable sample: empty time series")
 
     # Identify rows without missing values.
     valid_rows = np.flatnonzero(
-        ~sample_prep.isna().any(axis=1).to_numpy()
+        np.isfinite(sample_prep.to_numpy(dtype=float)).all(axis=1)
     )
 
-    # If no fully valid rows exist, retain the sample rather than
-    # stopping the experiment.
     if valid_rows.size == 0:
-        return sample_prep
+        raise ValueError("Unusable sample: no fully finite row")
 
     # Keep the range from the first to the last fully valid row.
     return sample_prep.iloc[
@@ -111,18 +107,21 @@ def preprocess_data(
         col_max = sample_data.max()
         col_range = col_max - col_min
 
+        observed = np.isfinite(sample_data)
         sample_data = (sample_data - col_min) / col_range
 
         # Replace NaNs only for columns with finite, constant values.
         # Genuine missing observations remain NaN for subsequent interpolation
         # or missing-value rejection.
         constant_cols = (
-                col_min.notna()
-                & col_max.notna()
+                np.isfinite(col_min)
+                & np.isfinite(col_max)
                 & col_range.eq(0)
         )
 
-        sample_data.loc[:, constant_cols] = 0.0
+        sample_data.loc[:, constant_cols] = sample_data.loc[:, constant_cols].where(
+            ~observed.loc[:, constant_cols], 0.0
+        )
     if interpolate:
         sample_data = sample_data.interpolate()
     return sample_data
@@ -153,11 +152,23 @@ def benchmarking(X, cfg, method_to_test):
     Takes in the output of the data loader and perform the predictions with a specified method.
     If anything else should happen with the data beforehand this should happen here.
     """
+    if not X:
+        raise ValueError("Unusable dataset: no samples selected")
+    # Validate the entire selection before executing any method.
+    for sample in X:
+        validate_sample(sample, min_rows=max(2, cfg.method.max_lag + 1))
     preds = []
     for x, sample in enumerate(X):
         print(x, "/", len(X))
         preds.append(method_to_test(sample, cfg.method))
     return preds
+
+
+def validate_sample(sample, min_rows=2):
+    if sample.empty or len(sample) < min_rows:
+        raise ValueError(f"Unusable sample: requires at least {min_rows} rows and one column")
+    if not np.isfinite(sample.to_numpy(dtype=float)).all():
+        raise ValueError("Unusable sample: unresolved missing or nonfinite observations")
 
 
 def load_joint_samples(cfg, index_col="datetime", preprocessing=None):
@@ -181,7 +192,7 @@ def load_joint_samples(cfg, index_col="datetime", preprocessing=None):
     unique_nodes = ([index_col] + [str(x) for x in unique_nodes]) if index_col else [str(x) for x in unique_nodes]
     # load required files
     data = pd.read_csv(
-        cfg.data_path,
+        artifact_path(cfg.data_path),
         index_col=index_col if index_col else None,
         usecols=unique_nodes,
     )
@@ -218,3 +229,4 @@ def save_run(out, stop_time, preds, cfg):
     with open(inner_p + "/preds.p", "wb") as f:
         pickle.dump(preds, f)
     # pickle.dump(preds, open(inner_p + "/preds.p", "wb"))
+    return Path(inner_p)

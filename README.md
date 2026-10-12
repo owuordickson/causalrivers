@@ -30,7 +30,27 @@ Check out our new work: [TCD-Arena](https://tcd-arena.github.io/)
 
 ## Install
 
-For the core benchmarking package simply run (uses conda, unzip and wget):
+For the PR #232 bounded comparison, the supported profile is the pip environment
+recorded in [evidence/review-232/requirements-resolved.txt](evidence/review-232/requirements-resolved.txt).
+It was installed and run on Windows x64, CPython 3.14.0, CPU, with so4gp 1.0.8
+and Torch 2.13.0. Installation, imports, versions, archive verification, generation,
+regressions, and complete run commands are in [evidence/review-232](evidence/review-232).
+
+From the benchmark root, using PowerShell:
+
+```powershell
+python -m venv .venv_review
+.venv_review/Scripts/python.exe -m pip install -r evidence/review-232/requirements-resolved.txt
+.venv_review/Scripts/python.exe verify_setup.py
+.venv_review/Scripts/python.exe -m unittest discover -s tests -v
+```
+
+The Conda export below is a historical notebook profile, not a validated alternate
+profile for this delivery. Its key runtime pins are aligned, but no Conda solve or
+installation is claimed. The CPU comparison recovers river-network graphs; it does
+not evaluate held-out weather or NDVI forecasts or complete O1 acceptance. Refs #19.
+
+Historical upstream notebook setup (uses conda, unzip and wget):
 
 ```bash
 ./install.sh

@@ -19,7 +19,6 @@ def main(cfg: DictConfig):
     if cfg.method.name == "tgraank":
         from tools.baseline_methods import var_tgraank as cd_method
     elif cfg.method.name == "var":
-        # Only meant for testing purposes.
         from tools.baseline_methods import var_baseline as cd_method
     else:
         raise ValueError("SPECIFY AND LOAD YOUR OWN METHOD HERE")
@@ -44,7 +43,17 @@ def main(cfg: DictConfig):
 
     if cfg.save_full_out:
         print("Saving...")
-        save_run(out, stop_time, preds, cfg)
+        run_path = save_run(out, stop_time, preds, cfg)
+        from tools.provenance import environment_record, write_run_record
+
+        write_run_record(
+            run_path, cfg, "python benchmark.py " + " ".join(sys.argv[1:]),
+            {"restrict_to": cfg.restrict_to, "sample_count": len(test_data),
+             "nodes": [[str(c) for c in sample.columns] for sample in test_data],
+             "rows": [len(sample) for sample in test_data],
+             "time_ranges": [[str(sample.index[0]), str(sample.index[-1])] for sample in test_data]},
+            environment_record(),
+        )
     print("Done", stop_time)
 
 

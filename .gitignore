@@ -1,5 +1,7 @@
 product/
 datasets/
 outputs/
+.venv_review/
+product.zip
 
 **.pyc

@@ -68,6 +68,15 @@ def score(preds, labs, remove_autoregressive=True, name="Result"):
         preds = np.expand_dims(preds, 0)
         labs = np.expand_dims(labs, 0)
 
+    if preds.ndim != 3 or labs.ndim != 3 or preds.shape != labs.shape:
+        raise ValueError("Predictions and labels must have identical (samples, effects, causes) shapes")
+    if not preds.size or preds.shape[1] != preds.shape[2] or preds.shape[1] < 2:
+        raise ValueError("Cannot score an empty or invalid graph selection")
+    if not np.isfinite(preds).all() or not np.isfinite(labs).all():
+        raise ValueError("Cannot score nonfinite predictions or labels")
+    if not np.isin(labs, [0, 1]).all():
+        raise ValueError("Graph labels must be binary")
+
     # Calculates a number of metrics and returns a df holding them
     print("Scoring...")
     # We remove the diagonal as rivers are highly autocorrelated and the causal links here are not relevant.
