@@ -158,6 +158,8 @@ class IntegrityTests(unittest.TestCase):
         )
         (self.root / "tools").mkdir()
         (self.root / "tools/scoring_tools.py").write_text("fixture scorer identity")
+        # Recovery must work on a fresh checkout without the old ignored labels.
+        self.path.unlink()
         for names in (["2", "1"], ["1", "2"]):
             predictions = [pd.DataFrame([[0, 0.2], [0.8, 0]], columns=names, index=names)]
             (run / "preds.p").write_bytes(pickle.dumps(predictions))
@@ -179,7 +181,10 @@ class IntegrityTests(unittest.TestCase):
                     rescore(run, output, recovered)
                 self.assertFalse(output.exists())
             else:
-                with patch("rescore.environment_record", return_value={"mode": "test"}):
+                with (
+                    patch("rescore.environment_record", return_value={"mode": "test"}),
+                    patch("rescore.source_record", return_value={"commit": "fixture"}),
+                ):
                     scored = rescore(run, output, recovered)
                 self.assertEqual(scored.loc["AUROC"].iloc[0], 1)
 

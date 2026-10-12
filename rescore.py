@@ -9,7 +9,7 @@ import pandas as pd
 from omegaconf import OmegaConf
 
 from tools.integrity import artifact_key, artifact_path, secure_load_pickle, verified_bytes
-from tools.provenance import environment_record, file_record
+from tools.provenance import environment_record, file_record, source_record
 from tools.scoring_tools import score
 from tools.tools import graph_to_label_tensor
 
@@ -22,7 +22,11 @@ def rescore(run, output, labels_override=None):
     record = json.loads((run / "provenance.json").read_text(encoding="utf-8"))
     # Verify all recorded inputs/artifacts before any pickle deserialization.
     for group in ("inputs", "artifacts"):
-        for entry in record[group].values():
+        for name, entry in record[group].items():
+            if group == "inputs" and name == "labels" and labels_override is not None:
+                # The recovered selection replaces the unavailable archived label file.
+                # It is independently manifest-verified below before deserialization.
+                continue
             verified_bytes(entry["filepath"], entry["sha256"])
     artifacts = record["artifacts"]
     for name, entry in artifacts.items():
@@ -76,6 +80,7 @@ def rescore(run, output, labels_override=None):
         "labels_override": labels_override is not None,
         "run_provenance": file_record(run / "provenance.json"),
         "scorer": file_record("tools/scoring_tools.py"),
+        "source": source_record(),
         "environment": environment_record(),
         "pooled_auroc": float(result.loc["AUROC"].iloc[0]),
         "mean_per_graph_auroc": float(result.loc["Individual AUROC"].iloc[0]),
