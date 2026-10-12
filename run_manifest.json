@@ -1,20 +1,44 @@
 {
-  "test_run": [
-    {
-      "run_id": "confounder_3_var",
-      "status": "Testing",
-      "environment": "Python 3.14 / Ubuntu Linux",
-      "so4gp_version": "1.0.8",
-      "notes": "For testing ONLY."
-    }
-  ],
   "benchmark_runs": [
     {
-      "run_id": "confounder_3_tgraank",
-      "status": "regenerated",
-      "environment": "Python 3.14 / Ubuntu Linux",
-      "so4gp_version": "1.0.8",
-      "notes": "Regenerated pair matching updated environment footprint."
+      "run_id": "results/tgraank_1_random_5/20260921025013",
+      "status": "restored-historical-original",
+      "record": {
+        "filepath": "results/tgraank_1_random_5/20260921025013/provenance.json",
+        "sha256": "4827475e355f710125454aa9e73feb9266acba598a32b0bd8431fce4bc80bf6f"
+      }
+    },
+    {
+      "run_id": "results/tgraank_1_random_5/recovered-replacement-3025328c",
+      "status": "preserved-replacement",
+      "record": {
+        "filepath": "results/tgraank_1_random_5/recovered-replacement-3025328c/provenance.json",
+        "sha256": "69de89edb1a3b85fb0eb0cf343c3c123dc396500ecedc16dad42ce6416cb1f43"
+      }
+    },
+    {
+      "run_id": "results/tgraank_confounder_3/20260926075557",
+      "status": "historical-existing",
+      "record": {
+        "filepath": "results/tgraank_confounder_3/20260926075557/provenance.json",
+        "sha256": "f2e3a9fff6429bd33a0b4db58353e97e45331a515e0aa567ac0545783bcbf997"
+      }
+    },
+    {
+      "run_id": "results/var_confounder_3/20261012182059",
+      "status": "executed",
+      "record": {
+        "filepath": "results/var_confounder_3/20261012182059/provenance.json",
+        "sha256": "467bd2ed374d5058d7fe50af0c5f3b50ce675ce034fe6b63d445206983086de8"
+      }
+    },
+    {
+      "run_id": "results/tgraank_confounder_3/20261012182600",
+      "status": "executed",
+      "record": {
+        "filepath": "results/tgraank_confounder_3/20261012182600/provenance.json",
+        "sha256": "9437769bb4a5a9a8b7e178a26f12329d233f90006305ef622f640c80594f90bd"
+      }
     }
   ],
   "data_runs": [
@@ -279,6 +303,84 @@
       "filepath": "datasets/disjoint_5/flood.p",
       "sha256": "b5b750ffcbf082c55e436db77245210af7c7807193cb878a51f8bd099c7e8eef",
       "status": "regenerated"
+    },
+    {
+      "filepath": "product/rivers_ts_east_germany.csv",
+      "sha256": "c0b2202df0c69eefd3174160d8d537aa4977452bd0545c77e3ef41052da8abc5",
+      "status": "frozen-existing-input"
+    },
+    {
+      "filepath": "evidence/review-232/generated/confounder_3/east.p",
+      "sha256": "3579fb8cfb8bc5c2f0fc7dfa74d45b81acd7b85f1d6681c4c48dc5e9c34e81ce",
+      "status": "regenerated"
+    },
+    {
+      "filepath": "evidence/review-232/generated/confounder_3/bav.p",
+      "sha256": "da8a03dcdb9fa9727137e50f88c73faca060931bb8ec62a37dcc958ae1a06f78",
+      "status": "regenerated"
+    },
+    {
+      "filepath": "evidence/review-232/generated/confounder_3/flood.p",
+      "sha256": "589985dd304e8c8dc3ccd504ebff8a5999d341b1c391fd944ec1d336dfcb5b36",
+      "status": "regenerated"
+    },
+    {
+      "filepath": "evidence/review-232/reconstructed/historical-original/east.p",
+      "sha256": "00a400cf01ab4bec46727c17d2cff13e58541638fc9a9ee531fdd5572b37ccd9",
+      "status": "reconstructed-from-prediction-node-identities"
+    },
+    {
+      "filepath": "evidence/review-232/reconstructed/preserved-replacement/east.p",
+      "sha256": "00a400cf01ab4bec46727c17d2cff13e58541638fc9a9ee531fdd5572b37ccd9",
+      "status": "reconstructed-from-prediction-node-identities"
+    },
+    {
+      "source": "datasets/confounder_3/east.p",
+      "status": "frozen-byte-copy",
+      "filepath": "evidence/review-232/frozen/confounder_3/east.p",
+      "sha256": "3579fb8cfb8bc5c2f0fc7dfa74d45b81acd7b85f1d6681c4c48dc5e9c34e81ce"
     }
-  ]
+  ],
+  "paired_comparison": {
+    "filepath": "evidence/review-232/pair.json",
+    "sha256": "df88594f90e10894d034b613e6c2efd4df5d8eb8bcda752bc11c8c85ad3dc899"
+  },
+  "rescoring_runs": [
+    {
+      "filepath": "results/rescores/review-232-original-portable/rescore.json",
+      "sha256": "f709a9352283edc36bf129d566943f96e2991b5863bbc889ba0d58eb7cedfdbb"
+    },
+    {
+      "filepath": "results/rescores/review-232-replacement-portable/rescore.json",
+      "sha256": "c3e1651e6f17e8e8cd256253ea2fde74227049080af50d257b50b5ff9caa8e2b"
+    }
+  ],
+  "environment_record": {
+    "filepath": "evidence/review-232/environment.json",
+    "sha256": "66856ca37ad8dfb775618fc0b7473b54043529b2428f1940995464a0271a8f11"
+  },
+  "setup_record": {
+    "filepath": "evidence/review-232/setup.json",
+    "sha256": "2b7925f3d7bf2723e072d4c270c946f7557004281a3ea2af9a1dff6c7220d4f3"
+  },
+  "historical_preservation": {
+    "original_commit": "7ff9c9f8c0b2468ddef05df5cdb82115a4ee00e1",
+    "original_predictions": {
+      "filepath": "results/tgraank_1_random_5/20260921025013/preds.p",
+      "sha256": "9ef8dde2eae02e7baeb3ebcaef7abf49ab5c0958abdcf3d03146c1d6779ab9f8"
+    },
+    "replacement_predictions": {
+      "filepath": "results/tgraank_1_random_5/recovered-replacement-3025328c/preds.p",
+      "sha256": "3025328c719dcaaa3792be1d82add437af3b1fa4a3c04a8afaaf2aed31c33013"
+    },
+    "labels": {
+      "filepath": "evidence/review-232/reconstructed/historical-original/east.p",
+      "sha256": "00a400cf01ab4bec46727c17d2cff13e58541638fc9a9ee531fdd5572b37ccd9"
+    },
+    "label_recovery": {
+      "filepath": "evidence/review-232/reconstructed/historical-original/reconstruction.json",
+      "sha256": "dee8cf3e639ebca5054ddb776c3959a5ba2f65f1e58a4c036fda4b00c2731b32"
+    },
+    "scope": "The original four result files are restored byte for byte. Ordered labels were reconstructed from prediction IDs and verified product topology; original serialized label bytes and production environment remain unavailable."
+  }
 }

@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "run_id": "results/tgraank_confounder_3/20260926075557",
+  "status": "historical-existing",
+  "command": null,
+  "source": {
+    "commit": "8bb9cf016a4269f1620cd6146fa1fa42b32233b6",
+    "files": [
+      {
+        "filepath": "benchmark.py",
+        "sha256": "89b5d1eaad14c3056be9bab871855bf5be3d6e9ede23e6e1909269ff97b43091"
+      },
+      {
+        "filepath": "tools/tools.py",
+        "sha256": "168883522d057af20637a63490261100c3f665928417c40350393581995c4779"
+      },
+      {
+        "filepath": "tools/integrity.py",
+        "sha256": "425657bf10dcb37869004da9d83a6eeee4ac5f46018037c3f5a5defc12995269"
+      },
+      {
+        "filepath": "tools/baseline_methods.py",
+        "sha256": "d9e0c0f62ed45c90fe12d1d0beb8e58bc49a21d21f68a68e3cddca43d811c1be"
+      },
+      {
+        "filepath": "tools/scoring_tools.py",
+        "sha256": "c1bf2e56312e0bb6fa595627b42d158b43bfc348d63b1b45b210350fddf4a2c7"
+      },
+      {
+        "filepath": "tools/provenance.py",
+        "sha256": "6beeba96c99a510b863c0a4756b1c7315179b120df44226db568ef61153beb98"
+      }
+    ]
+  },
+  "environment": {
+    "status": "historical producer environment not captured"
+  },
+  "selection": {
+    "restrict_to": -1
+  },
+  "inputs": {
+    "labels": {
+      "filepath": "datasets/confounder_3/east.p",
+      "sha256": "3579fb8cfb8bc5c2f0fc7dfa74d45b81acd7b85f1d6681c4c48dc5e9c34e81ce"
+    },
+    "timeseries": {
+      "filepath": "product/rivers_ts_east_germany.csv",
+      "sha256": "c0b2202df0c69eefd3174160d8d537aa4977452bd0545c77e3ef41052da8abc5"
+    }
+  },
+  "artifacts": {
+    "config.yaml": {
+      "filepath": "results/tgraank_confounder_3/20260926075557/config.yaml",
+      "sha256": "c1f045742c46e88a7eeec600890854898182fcac447015fdac7c59bb519b6c32"
+    },
+    "preds.p": {
+      "filepath": "results/tgraank_confounder_3/20260926075557/preds.p",
+      "sha256": "a0929ed7274dce21056ea988ef310d78989a567baf79d0b14bb173ad48bcbf88"
+    },
+    "runtime.csv": {
+      "filepath": "results/tgraank_confounder_3/20260926075557/runtime.csv",
+      "sha256": "1bb2ce16b33367ba34d62b768f30043f91d61f50b21ff956ac2679e1c20eff63"
+    },
+    "scoring.csv": {
+      "filepath": "results/tgraank_confounder_3/20260926075557/scoring.csv",
+      "sha256": "fd3ba2be2f96076fa7081cc709f2d23f7c5c34ecc480d1362f4c3ba7875e874f"
+    }
+  },
+  "scorer": {
+    "filepath": "tools/scoring_tools.py",
+    "sha256": "c1bf2e56312e0bb6fa595627b42d158b43bfc348d63b1b45b210350fddf4a2c7"
+  },
+  "metrics": {
+    "AUROC": "pooled off-diagonal",
+    "Individual AUROC": "mean per graph, excluding single-class graphs"
+  },
+  "artifact_origin_commit": "8bb9cf016a4269f1620cd6146fa1fa42b32233b6",
+  "provenance_scope": "Reconstructed for checksum-aware rescoring. Input digests are the currently frozen inputs; the original input/environment/command was not recorded and cannot be inferred."
+}
