@@ -102,13 +102,13 @@ This is the core benchmarking package, which only holds the core functionality a
 ## Usage
 
 We use Hydra to organize preprocessing and method Hyperparameters. Along with this we provide functions to load data and score results.
-We keep a single baseline strategy (VAR) here that is used as a placeholder and can be replaced with your own method. To check how the scoring works simply run:
+The harness provides T-GRAANK and a VAR comparator. The default method is T-GRAANK; select VAR explicitly with `method=var`. To check how the scoring works simply run:
 
 ```bash
 python benchmark.py
 ```
 
-This will run a var strategy with specified preprocessing on the "confounder 3" dataset and reproduce the scoring. For the remaining experimental results we refer to [the experiments repo](https://github.com/CausalRivers/experiments)
+This runs T-GRAANK with the configured preprocessing on the "confounder 3" dataset. The complete commands for reproducing both methods on the tracked frozen labels are in [the delivered evidence](evidence/review-232/README.md). `run_pair.py` captures one evidence identity and refuses to replace an existing pair; use the two full method commands to create new result identities. For the remaining upstream experimental results we refer to [the experiments repo](https://github.com/CausalRivers/experiments).
 
 If you want to score your own method on a specific set of graph samples you can simply replace the baseline_method, configure it with hydra and run:
 
