@@ -28,13 +28,23 @@ def main():
     frozen.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(BENCHMARK_ROOT / "datasets/confounder_3/east.p", frozen)
     manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-    manifest["data_runs"].append(
-        {
-            **file_record(frozen),
-            "status": "frozen-byte-copy",
-            "source": "datasets/confounder_3/east.p",
-        }
-    )
+    frozen_record = file_record(frozen)
+    matches = [
+        entry
+        for entry in manifest["data_runs"]
+        if entry.get("filepath") == frozen_record["filepath"]
+    ]
+    if matches:
+        if len(matches) != 1 or matches[0]["sha256"] != frozen_record["sha256"]:
+            raise ValueError("Frozen pair identity has an inconsistent or ambiguous manifest entry")
+    else:
+        manifest["data_runs"].append(
+            {
+                **frozen_record,
+                "status": "frozen-byte-copy",
+                "source": "datasets/confounder_3/east.p",
+            }
+        )
     MANIFEST_PATH.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     environment = environment_record()
     if environment["mode"] != "cpu":

@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (
-    accuracy_score,
     precision_recall_curve,
     roc_auc_score,
 )
@@ -32,7 +31,10 @@ def max_accuracy(labs, preds):
             )
         )  # 100 steps
     possible_thresholds = [0] + a + [preds.max() + 1e-6]
-    acc = [accuracy_score(labs, preds > thresh) for thresh in possible_thresholds]
+    # Evaluate the same threshold grid in one array operation. This avoids
+    # hundreds of sklearn validations per graph during archived rescoring.
+    thresholds = np.asarray(possible_thresholds)
+    acc = ((preds[None, :] > thresholds[:, None]) == labs[None, :]).mean(axis=1)
     acc_thresh = possible_thresholds[np.argmax(acc)]
     acc_score = np.nanmax(acc)
     return acc_thresh, acc_score
@@ -69,7 +71,9 @@ def score(preds, labs, remove_autoregressive=True, name="Result"):
         labs = np.expand_dims(labs, 0)
 
     if preds.ndim != 3 or labs.ndim != 3 or preds.shape != labs.shape:
-        raise ValueError("Predictions and labels must have identical (samples, effects, causes) shapes")
+        raise ValueError(
+            "Predictions and labels must have identical (samples, effects, causes) shapes"
+        )
     if not preds.size or preds.shape[1] != preds.shape[2] or preds.shape[1] < 2:
         raise ValueError("Cannot score an empty or invalid graph selection")
     if not np.isfinite(preds).all() or not np.isfinite(labs).all():

@@ -20,6 +20,8 @@ SOURCE_FILES = (
     "rescore.py",
     "verify_setup.py",
     "requirements.txt",
+    "run_pair.py",
+    "environment_probe.py",
 )
 
 

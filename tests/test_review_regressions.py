@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 from tools import integrity
-from tools.scoring_tools import score
+from tools.scoring_tools import max_accuracy, score
 from tools.tools import benchmarking, graph_to_label_tensor, preprocess_data, remove_trailing_nans
 
 
@@ -237,6 +237,14 @@ class PreprocessingTests(unittest.TestCase):
 
 
 class MethodAndScorerTests(unittest.TestCase):
+    def test_accuracy_threshold_grid_preserves_first_best_threshold(self):
+        threshold, accuracy = max_accuracy(np.array([0, 0, 1, 1]), np.array([0, 0.2, 0.8, 1]))
+        self.assertAlmostEqual(threshold, 0.2)
+        self.assertEqual(accuracy, 1)
+        threshold, accuracy = max_accuracy(np.array([0, 1, 0]), np.zeros(3))
+        self.assertEqual(threshold, 0)
+        self.assertEqual(accuracy, 2 / 3)
+
     def test_tgraank_isolates_upstream_dataframe_mutation(self):
         from tools.baseline_methods import var_tgraank
 
