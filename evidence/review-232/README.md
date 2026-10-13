@@ -2,6 +2,12 @@
 
 Refs #19. This is a bounded O1 river-network graph-recovery contribution. It is not held-out weather/NDVI forecast validation or full contractual acceptance. No GPU campaign or multi-method/multi-day rerun is claimed.
 
+## Historical source clarification (13 October 2026)
+
+The producer source commit, source bytes and scorer version are unknown for the restored Random+1-5 original, its preserved replacement, and the older Confounder-3 run. Their reconstructed `provenance.json` records now say `unknown-historical-producer`; the former `8bb9cf0` claim is withdrawn because its later working-tree hashes do not identify that Git revision. The superseded metadata remains in Git history at `dfe65f45`. Frozen/reconstructed input hashes identify later rescoring inputs, not recovered original production inputs, commands or environments.
+
+The separate portable `rescore.json` records retain the verified later scoring source at `dfadcd91`. For recorded source files in the pair, rescoring and validation records, `hash_bytes` now declares either exact Git blob bytes or the Git blob converted to Windows CRLF newlines. Each hash was checked against its declared commit. Dependent manifest and rescore provenance hashes have been refreshed. Prediction, configuration, runtime, score and label artifacts are unchanged; no mining or scoring rerun was needed for this metadata correction.
+
 Tested regression and historical-rescoring source SHA: `dfadcd91410446148f1f767788d72bea37b2888e`. The scored pair source SHA is `a95c5fdc48fb74c6bdd1837e9c1496011813abdd`; the subsequent code change makes reconstructed-label rescoring portable and does not change either method or the scorer. The final child evidence commit contains these sources plus the recorded artifacts. `validation.json` links the resolved environment, actual installation report, source hashes and passing tests. Supported execution profile: Windows x64, CPython 3.14.0, CPU. The historical Conda/notebook export is not a validated alternate profile for this delivery.
 
 | Review item | Concrete correction and evidence |

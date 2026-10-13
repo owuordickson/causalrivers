@@ -4,33 +4,9 @@
   "status": "historical-existing",
   "command": null,
   "source": {
-    "commit": "8bb9cf016a4269f1620cd6146fa1fa42b32233b6",
-    "files": [
-      {
-        "filepath": "benchmark.py",
-        "sha256": "89b5d1eaad14c3056be9bab871855bf5be3d6e9ede23e6e1909269ff97b43091"
-      },
-      {
-        "filepath": "tools/tools.py",
-        "sha256": "168883522d057af20637a63490261100c3f665928417c40350393581995c4779"
-      },
-      {
-        "filepath": "tools/integrity.py",
-        "sha256": "425657bf10dcb37869004da9d83a6eeee4ac5f46018037c3f5a5defc12995269"
-      },
-      {
-        "filepath": "tools/baseline_methods.py",
-        "sha256": "d9e0c0f62ed45c90fe12d1d0beb8e58bc49a21d21f68a68e3cddca43d811c1be"
-      },
-      {
-        "filepath": "tools/scoring_tools.py",
-        "sha256": "c1bf2e56312e0bb6fa595627b42d158b43bfc348d63b1b45b210350fddf4a2c7"
-      },
-      {
-        "filepath": "tools/provenance.py",
-        "sha256": "6beeba96c99a510b863c0a4756b1c7315179b120df44226db568ef61153beb98"
-      }
-    ]
+    "status": "unknown-historical-producer",
+    "commit": null,
+    "files": []
   },
   "environment": {
     "status": "historical producer environment not captured"
@@ -67,13 +43,14 @@
     }
   },
   "scorer": {
+    "status": "unknown-historical-producer",
     "filepath": "tools/scoring_tools.py",
-    "sha256": "c1bf2e56312e0bb6fa595627b42d158b43bfc348d63b1b45b210350fddf4a2c7"
+    "sha256": null
   },
   "metrics": {
     "AUROC": "pooled off-diagonal",
     "Individual AUROC": "mean per graph, excluding single-class graphs"
   },
   "artifact_origin_commit": "8bb9cf016a4269f1620cd6146fa1fa42b32233b6",
-  "provenance_scope": "Reconstructed for checksum-aware rescoring. Input digests are the currently frozen inputs; the original input/environment/command was not recorded and cannot be inferred."
+  "provenance_scope": "Reconstructed metadata for checksum-aware rescoring, not a captured production record. The historical producer source commit, source bytes, scorer version, command, environment and original input bytes are unknown. Input digests identify later frozen/reconstructed inputs only. The former 8bb9cf0 source claim mixed later working-tree hashes that do not match that commit; it is withdrawn. The superseded metadata remains in Git at dfe65f45. Separate rescore records identify the verified later scoring source and labels."
 }
