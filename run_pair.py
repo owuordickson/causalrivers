@@ -77,7 +77,7 @@ def main():
             f"Executing {method}: all {len(graphs)} frozen observable-confounder graphs, CPU",
             flush=True,
         )
-        result = subprocess.run(command, cwd=BENCHMARK_ROOT, capture_output=True, text=True)
+        result = subprocess.run(command, cwd=BENCHMARK_ROOT, capture_output=True, text=True, check=False)
         (evidence / f"{method}-run.txt").write_text(result.stdout + result.stderr, encoding="utf-8")
         if result.returncode:
             print(result.stdout + result.stderr, flush=True)
