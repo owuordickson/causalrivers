@@ -1,7 +1,7 @@
 *** ADD SUBMODULE ***
 1. Fork the CausalRivers repo
 2. git submodule add https://github.com/owuordickson/causalrivers.git benchmarks/causalrivers
-3. Add causalrivers to Git via: Settings -> Version Control -> Directory Mappings
+3. Add causalrivers to Git via (PyCharm): Settings -> Version Control -> Directory Mappings
 
 
 *** DOWNLOAD PRODUCT ***
